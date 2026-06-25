@@ -1,0 +1,417 @@
+/* =========================================================
+   KNIHOVNA POHÁDEK — retro kazetový styl
+   ========================================================= */
+
+:root{
+  --cream:        #FBF3E7;
+  --cream-dim:     #F1E6D4;
+  --ink:           #2B3344;
+  --ink-soft:      #5B6478;
+  --terracotta:    #C9633B;
+  --terracotta-dk: #A84E2D;
+  --gold:          #E8B84B;
+  --accent2:       #2F6E68;
+  --shadow:        rgba(43,51,68,0.18);
+  --radius-lg:     28px;
+  --radius-md:     18px;
+  --radius-sm:     10px;
+  --font-display:  'Fredoka', system-ui, sans-serif;
+  --font-body:     'Inter', system-ui, sans-serif;
+  color-scheme: light;
+}
+
+/* Dark mode: jen černá a červená, žádná modrá (kvůli modrému světlu před spaním) */
+html[data-theme="dark"]{
+  --cream:        #140A0A;
+  --cream-dim:     #2A1414;
+  --ink:           #F5E9E2;
+  --ink-soft:      #C99A8E;
+  --terracotta:    #E2483D;
+  --terracotta-dk: #B23226;
+  --gold:          #D9A23B;
+  --accent2:       #7A231D;
+  --shadow:        rgba(0,0,0,0.45);
+  color-scheme: dark;
+}
+
+*{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html,body{
+  margin:0; padding:0; height:100%;
+  background:var(--cream);
+  color:var(--ink);
+  font-family:var(--font-body);
+  overscroll-behavior:none;
+  user-select:none;
+  transition:background .25s ease, color .25s ease;
+}
+button{ font-family:inherit; border:none; background:none; cursor:pointer; color:inherit; }
+img{ -webkit-user-drag:none; }
+input[type="search"]::-webkit-search-cancel-button{ display:none; }
+
+/* ---------- ikony ---------- */
+.icon{ width:22px; height:22px; display:block; }
+.icon--small{ width:18px; height:18px; }
+.icon--huge{ width:64px; height:64px; color:var(--ink-soft); }
+
+.screen{
+  position:fixed; inset:0;
+  display:flex; flex-direction:column;
+  background:var(--cream);
+  overflow-y:auto;
+}
+.screen--hidden{ display:none; }
+.screen--centered{
+  align-items:center; justify-content:center;
+  padding:24px;
+  text-align:center;
+}
+
+/* ---------- horní lišta ---------- */
+.topbar{
+  display:flex; align-items:center; gap:8px;
+  padding:14px 16px;
+  background:var(--cream);
+  border-bottom:1px solid var(--cream-dim);
+  position:sticky; top:0; z-index:5;
+}
+.topbar__title{
+  font-family:var(--font-display);
+  font-weight:600;
+  font-size:1.3rem;
+  flex:1;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.topbar__title--player{ text-align:center; font-size:1.1rem; }
+.icon-btn{
+  width:44px; height:44px; min-width:44px;
+  border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--cream-dim);
+  color:var(--ink);
+  transition:transform .15s ease, background .15s ease;
+}
+.icon-btn:active{ transform:scale(.9); background:var(--gold); }
+
+.breadcrumb{
+  flex:1; display:flex; gap:6px; overflow-x:auto;
+  font-size:.95rem; color:var(--ink-soft);
+  white-space:nowrap;
+}
+.breadcrumb button{
+  color:var(--ink-soft); font-weight:600; padding:4px 6px;
+}
+.breadcrumb button:last-child{ color:var(--terracotta-dk); }
+.breadcrumb__sep{ color:var(--ink-soft); opacity:.5; }
+
+/* ---------- PIN obrazovka ---------- */
+.pin-box{ display:flex; flex-direction:column; align-items:center; max-width:360px; width:100%; }
+.pin-tape{ margin-bottom:8px; }
+.pin-tape__window{
+  width:120px; height:60px; border-radius:14px;
+  background:var(--ink);
+  display:flex; align-items:center; justify-content:space-around;
+  padding:0 14px;
+}
+.reel{
+  width:30px; height:30px; border-radius:50%;
+  background:radial-gradient(circle at center, var(--cream) 0 6px, var(--gold) 7px 9px, var(--ink-soft) 10px 30px);
+  border:3px solid var(--cream-dim);
+}
+.reel--spin{ animation:spin 1.6s linear infinite; }
+@keyframes spin{ from{transform:rotate(0)} to{transform:rotate(360deg)} }
+
+.pin-title{ font-family:var(--font-display); font-size:1.6rem; margin:10px 0 2px; }
+.pin-subtitle{ color:var(--ink-soft); margin:0 0 18px; }
+
+.pin-dots{ display:flex; gap:16px; margin-bottom:10px; }
+.pin-dot{
+  width:18px; height:18px; border-radius:50%;
+  background:var(--cream-dim); border:2px solid var(--ink-soft);
+  transition:background .15s ease, transform .15s ease;
+}
+.pin-dot--filled{ background:var(--terracotta); border-color:var(--terracotta-dk); transform:scale(1.1); }
+
+.pin-error{ color:var(--terracotta-dk); font-weight:600; height:1.2em; opacity:0; transition:opacity .15s; margin:0 0 14px; }
+.pin-error--show{ opacity:1; }
+.pin-box.pin-box--shake{ animation:shake .35s ease; }
+@keyframes shake{ 0%,100%{transform:translateX(0)} 25%{transform:translateX(-10px)} 75%{transform:translateX(10px)} }
+
+.pin-pad{
+  display:grid; grid-template-columns:repeat(3,1fr); gap:14px; width:100%;
+}
+.pin-key{
+  aspect-ratio:1; border-radius:50%;
+  background:var(--cream-dim);
+  box-shadow:0 4px 0 var(--shadow);
+  font-size:1.5rem; font-weight:600;
+  display:flex; align-items:center; justify-content:center;
+  transition:transform .1s ease, background .1s ease;
+}
+.pin-key:active{ transform:translateY(3px) scale(.96); background:var(--gold); box-shadow:0 1px 0 var(--shadow); }
+.pin-key--ghost{ background:transparent; box-shadow:none; font-size:1rem; color:var(--ink-soft); font-weight:600; }
+.pin-key--ghost:active{ background:var(--cream-dim); }
+
+/* ---------- načítání / chyba ---------- */
+.loading-tape{ display:flex; gap:30px; margin-bottom:20px; }
+.loading-tape .reel{ width:50px; height:50px; }
+.loading-text{ font-family:var(--font-display); font-size:1.2rem; color:var(--ink-soft); }
+.error-title{ font-family:var(--font-display); font-size:1.3rem; margin:14px 0 4px; }
+.error-detail{ color:var(--ink-soft); margin:0 0 20px; max-width:320px; }
+
+.btn{
+  padding:14px 28px; border-radius:999px; font-weight:700; font-size:1rem;
+  font-family:var(--font-display);
+}
+.btn--primary{ background:var(--terracotta); color:white; box-shadow:0 4px 0 var(--terracotta-dk); }
+.btn--primary:active{ transform:translateY(3px); box-shadow:0 1px 0 var(--terracotta-dk); }
+
+/* ---------- domovská obrazovka ---------- */
+.home-grid{
+  flex:1; display:flex; flex-direction:column; gap:20px;
+  padding:24px; max-width:520px; margin:0 auto; width:100%;
+  justify-content:center;
+}
+.home-card{
+  display:flex; align-items:center; gap:18px;
+  padding:26px 24px; border-radius:var(--radius-lg);
+  text-align:left; position:relative;
+  transition:transform .12s ease;
+}
+.home-card:active{ transform:scale(.97); }
+.home-card__icon{ flex-shrink:0; }
+.home-card__icon .icon{ width:34px; height:34px; }
+.home-card__label{ font-family:var(--font-display); font-size:1.4rem; font-weight:600; }
+.home-card__sub{ display:block; font-family:var(--font-body); font-size:.85rem; font-weight:400; opacity:.85; margin-top:2px; }
+.home-card--browse{ background:var(--accent2); color:white; }
+.home-card--random{ background:var(--terracotta); color:white; }
+.home-card--continue{ background:var(--gold); color:var(--ink); }
+.home-card--hidden{ display:none; }
+
+/* ---------- procházení (grid karet) ---------- */
+.grid{
+  flex:1; display:grid; gap:16px; padding:18px;
+  grid-template-columns:repeat(auto-fill, minmax(150px,1fr));
+  align-content:start;
+}
+.card{
+  display:flex; flex-direction:column; border-radius:var(--radius-md);
+  overflow:hidden; background:var(--cream-dim); box-shadow:0 3px 10px var(--shadow);
+  transition:transform .12s ease;
+}
+.card:active{ transform:scale(.96); }
+.card__art{
+  width:100%; aspect-ratio:1; object-fit:cover; background:var(--cream-dim);
+  display:flex; align-items:center; justify-content:center;
+}
+.card__art--folder{ color:var(--accent2); }
+.card__art--book{ color:var(--terracotta); }
+.card__art .icon{ width:38%; height:38%; }
+.card__label{
+  padding:10px 12px; font-size:.92rem; font-weight:600;
+  font-family:var(--font-body);
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+}
+
+.empty-msg{ text-align:center; color:var(--ink-soft); padding:40px; }
+.empty-msg--hidden{ display:none; }
+
+/* ---------- přehrávač ---------- */
+.player{
+  flex:1; display:flex; flex-direction:column; align-items:center;
+  padding:18px 24px 28px; max-width:480px; margin:0 auto; width:100%;
+}
+.player__cover-wrap{
+  width:min(58vw, 260px); aspect-ratio:1; border-radius:var(--radius-lg);
+  overflow:hidden; position:relative; box-shadow:0 8px 24px var(--shadow);
+  background:linear-gradient(135deg, var(--accent2), var(--ink));
+  margin-bottom:16px;
+  display:flex; align-items:center; justify-content:center;
+}
+.player__cover{ width:100%; height:100%; object-fit:cover; display:block; position:absolute; inset:0; }
+.player__cover-fallback{ color:rgba(255,255,255,.85); width:40%; height:40%; }
+.player__cassette-overlay{
+  position:absolute; left:0; right:0; bottom:0;
+  display:flex; justify-content:space-around; align-items:center;
+  padding:10px 22px; background:rgba(0,0,0,.4);
+}
+.player__cassette-overlay .reel{ width:24px; height:24px; }
+
+.player__meta{ text-align:center; margin-bottom:8px; min-height:1.6em; }
+.player__chapter{ font-family:var(--font-display); font-size:1.05rem; margin:0; }
+
+.player__progress{ display:flex; align-items:center; gap:10px; width:100%; margin-bottom:4px; }
+.player__time{ font-size:.8rem; color:var(--ink-soft); width:38px; text-align:center; }
+
+input[type="range"]{ -webkit-appearance:none; appearance:none; background:transparent; height:28px; }
+input[type="range"]::-webkit-slider-runnable-track{ height:6px; border-radius:4px; background:var(--cream-dim); }
+input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance:none; width:22px; height:22px; border-radius:50%;
+  background:var(--terracotta); border:3px solid var(--cream); box-shadow:0 1px 4px var(--shadow);
+  margin-top:-8px;
+}
+input[type="range"]::-moz-range-track{ height:6px; border-radius:4px; background:var(--cream-dim); }
+input[type="range"]::-moz-range-thumb{
+  width:16px; height:16px; border-radius:50%; border:3px solid var(--cream);
+  background:var(--terracotta);
+}
+.seek{ flex:1; }
+
+.player__controls{ display:flex; align-items:center; gap:26px; margin:10px 0 14px; }
+.ctrl-btn{
+  width:54px; height:54px; border-radius:50%; background:var(--cream-dim);
+  display:flex; align-items:center; justify-content:center;
+}
+.ctrl-btn .icon{ width:24px; height:24px; }
+.ctrl-btn--play{ width:78px; height:78px; background:var(--terracotta); color:white; box-shadow:0 4px 0 var(--terracotta-dk); }
+.ctrl-btn--play .icon{ width:32px; height:32px; }
+.ctrl-btn:active{ transform:scale(.92); }
+
+.player__volume{ display:flex; align-items:center; gap:12px; width:100%; max-width:280px; margin-bottom:18px; color:var(--ink-soft); }
+.volume-slider{ flex:1; }
+
+.player__toggles{ display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
+.toggle-btn{
+  display:flex; align-items:center; gap:8px;
+  padding:10px 16px; border-radius:999px; background:var(--cream-dim);
+  font-size:.85rem; font-weight:600; color:var(--ink-soft);
+}
+.toggle-btn[aria-pressed="true"]{ background:var(--accent2); color:white; }
+.toggle-btn__icon--infinity{ font-size:1.1rem; line-height:1; }
+
+/* ---------- spodní výsuvný panel ---------- */
+.sheet{ position:fixed; inset:0; z-index:20; }
+.sheet--hidden{ display:none; }
+.sheet__backdrop{ position:absolute; inset:0; background:rgba(0,0,0,.45); }
+.sheet__panel{
+  position:absolute; left:0; right:0; bottom:0; max-height:75vh;
+  background:var(--cream); border-radius:24px 24px 0 0;
+  padding:10px 20px 28px; display:flex; flex-direction:column;
+  box-shadow:0 -8px 30px var(--shadow);
+}
+.sheet__panel--small{ max-height:65vh; }
+.sheet__panel--center{ align-items:center; text-align:center; }
+.sheet__panel--full{ top:0; max-height:none; border-radius:0; padding:0; }
+.sheet__handle{ width:44px; height:5px; border-radius:4px; background:var(--cream-dim); margin:6px auto 14px; }
+.sheet__title{ font-family:var(--font-display); margin:0 0 4px; }
+.sheet__hint{ color:var(--ink-soft); font-size:.85rem; margin:0 0 14px; max-width:280px; }
+.sheet__list{ overflow-y:auto; }
+
+.chapter-row{
+  display:flex; align-items:center; gap:12px; padding:12px 8px; border-radius:12px;
+  width:100%; text-align:left;
+}
+.chapter-row--active{ background:var(--gold); }
+.chapter-row__num{ width:28px; height:28px; border-radius:50%; background:var(--cream-dim); display:flex; align-items:center; justify-content:center; font-size:.85rem; font-weight:700; flex-shrink:0; }
+.chapter-row--active .chapter-row__num{ background:var(--cream); }
+.chapter-row__name{ flex:1; font-weight:600; font-size:.95rem; }
+
+/* ---------- otočná minutka (sleep dial) ---------- */
+.dial{
+  position:relative; width:220px; height:220px; margin:6px auto 4px;
+  touch-action:none; outline:none;
+}
+.dial__svg{ width:100%; height:100%; transform:rotate(-90deg); }
+.dial__track{ fill:none; stroke:var(--cream-dim); stroke-width:14; }
+.dial__progress{
+  fill:none; stroke:var(--terracotta); stroke-width:14; stroke-linecap:round;
+  stroke-dasharray:0 578; transition:stroke-dasharray .05s linear;
+}
+.dial__handle{ fill:var(--cream); stroke:var(--terracotta-dk); stroke-width:3; }
+.dial:focus-visible .dial__track{ stroke:var(--accent2); }
+.dial__center{
+  position:absolute; inset:28px; border-radius:50%;
+  background:var(--cream); box-shadow:inset 0 0 0 2px var(--cream-dim);
+  display:flex; align-items:center; justify-content:center; text-align:center;
+  cursor:pointer;
+}
+.dial__value{ font-family:var(--font-display); font-weight:600; font-size:1.1rem; padding:0 10px; }
+
+/* ---------- hledání ---------- */
+.search-bar{
+  display:flex; align-items:center; gap:10px; padding:14px 16px;
+  border-bottom:1px solid var(--cream-dim); color:var(--ink-soft);
+}
+.search-input{
+  flex:1; border:none; background:transparent; font-size:1.05rem;
+  font-family:var(--font-body); color:var(--ink); outline:none;
+}
+.search-results{ flex:1; overflow-y:auto; padding:8px 12px 24px; }
+.search-row{
+  display:flex; align-items:center; gap:14px; width:100%; text-align:left;
+  padding:10px 8px; border-radius:14px;
+}
+.search-row__art{ width:52px; height:52px; border-radius:10px; object-fit:cover; flex-shrink:0; background:var(--cream-dim); display:flex; align-items:center; justify-content:center; color:var(--terracotta); }
+.search-row__art .icon{ width:55%; height:55%; }
+.search-row__name{ font-weight:700; font-size:.95rem; }
+.search-row__path{ font-size:.78rem; color:var(--ink-soft); }
+.search-hint{ text-align:center; color:var(--ink-soft); padding:30px; }
+
+/* ---------- responzivita pro větší tablety ---------- */
+@media (min-width: 700px){
+  .pin-pad{ max-width:320px; margin:0 auto; }
+}
+
+/* ---------- mini-přehrávač (perzistentní lišta) ---------- */
+.mini-player{
+  position:fixed; left:0; right:0; bottom:0; z-index:15;
+  display:flex; align-items:center; gap:12px;
+  padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+  background:var(--cream-dim);
+  border-top:1px solid var(--shadow);
+  box-shadow:0 -4px 16px var(--shadow);
+}
+.mini-player--hidden{ display:none; }
+.mini-player__art{
+  width:42px; height:42px; border-radius:10px; flex-shrink:0; overflow:hidden;
+  background:var(--cream); color:var(--terracotta);
+  display:flex; align-items:center; justify-content:center;
+}
+.mini-player__art .icon{ width:60%; height:60%; }
+.mini-player__info{ flex:1; min-width:0; }
+.mini-player__title{ margin:0; font-weight:700; font-size:.9rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.mini-player__chapter{ margin:0; font-size:.78rem; color:var(--ink-soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.mini-player__play{ flex-shrink:0; background:var(--terracotta); color:white; }
+.mini-player__play .icon{ width:18px; height:18px; }
+
+body.has-miniplayer #browse-grid{ padding-bottom:78px; }
+body.has-miniplayer .home-grid{ padding-bottom:78px; }
+
+/* ---------- losovací animace ---------- */
+.lottery{
+  position:fixed; inset:0; z-index:30;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(0,0,0,.55);
+}
+.lottery--hidden{ display:none; }
+.lottery__card{
+  background:var(--cream); padding:36px 30px; border-radius:28px;
+  display:flex; flex-direction:column; align-items:center; gap:14px;
+  box-shadow:0 14px 40px var(--shadow); min-width:240px; max-width:80vw;
+}
+.lottery__icon{ width:60px; height:60px; color:var(--terracotta); animation:lottery-spin .5s linear infinite; }
+.lottery__icon--settle{ animation:none !important; transform:scale(1.2); transition:transform .25s ease; }
+.lottery__text{
+  font-family:var(--font-display); font-weight:600; font-size:1.15rem;
+  text-align:center; min-height:1.4em; margin:0;
+}
+.lottery__text--final{ color:var(--terracotta-dk); }
+@keyframes lottery-spin{ from{transform:rotate(0)} to{transform:rotate(360deg)} }
+
+/* ---------- upozornění na přerušení přehrávání ---------- */
+.toast{
+  position:fixed; left:14px; right:14px; top:14px; z-index:40;
+  display:flex; align-items:center; gap:10px;
+  background:var(--ink); color:var(--cream);
+  padding:12px 14px; border-radius:16px;
+  box-shadow:0 6px 20px var(--shadow);
+  max-width:480px; margin:0 auto;
+}
+html[data-theme="dark"] .toast{ background:var(--terracotta-dk); }
+.toast--hidden{ display:none; }
+.toast .icon{ flex-shrink:0; color:var(--gold); }
+.toast__text{ flex:1; font-size:.85rem; font-weight:600; }
+.toast__btn{
+  flex-shrink:0; background:rgba(255,255,255,.18); color:var(--cream);
+  padding:8px 12px; border-radius:999px; font-weight:700; font-size:.8rem;
+}
+.toast__btn:active{ background:rgba(255,255,255,.32); }
