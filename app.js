@@ -10,7 +10,7 @@ const CONFIG = {
   API_KEY: "AIzaSyCR0rsJ07IKNXcXPtjF02O3jnlbuSGUTkI", // Google API klíč (jen čtení Disku)
   ROOT_FOLDER_ID: "1IC0jvfW2ZE-gCK9pW_Qu2cStT0j7mF50",  // ID hlavní složky s pohádkami
   ROOT_NAME: "Knihovna",                                 // jen popisek pro domovskou obrazovku
-  PIN: "1234",                                            // 4místný kód — ZMĚŇTE si ho!
+  PIN: "1308",                                            // 4místný kód — ZMĚŇTE si ho!
   SCAN_CONCURRENCY: 4,                                    // kolik složek skenovat najednou
   CACHE_KEY: "pohadky_cache_v1",
   LASTPLAY_KEY: "pohadky_lastplay_v1",
