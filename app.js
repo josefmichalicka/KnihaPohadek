@@ -10,7 +10,7 @@ const CONFIG = {
   API_KEY: "AIzaSyCR0rsJ07IKNXcXPtjF02O3jnlbuSGUTkI", // Google API klíč (jen čtení Disku)
   ROOT_FOLDER_ID: "1IC0jvfW2ZE-gCK9pW_Qu2cStT0j7mF50",  // ID hlavní složky s pohádkami
   ROOT_NAME: "Knihovna",                                 // jen popisek pro domovskou obrazovku
-  PIN: "1308",                                            // 4místný kód — ZMĚŇTE si ho!
+  PIN: "1234",                                            // 4místný kód — ZMĚŇTE si ho!
   SCAN_CONCURRENCY: 4,                                    // kolik složek skenovat najednou
   CACHE_KEY: "pohadky_cache_v1",
   LASTPLAY_KEY: "pohadky_lastplay_v1",
@@ -264,6 +264,7 @@ async function performScan() {
     collectBooks(root, state.allBooks);
     saveCache(root);
     showHome();
+    restoreLastPlay();
   } catch (err) {
     el("error-detail").textContent = err.message || String(err);
     showScreen("error");
@@ -279,6 +280,7 @@ function afterUnlock() {
     state.allBooks = [];
     collectBooks(state.tree, state.allBooks);
     showHome();
+    restoreLastPlay();
   } else {
     performScan();
   }
@@ -294,16 +296,43 @@ function getLastPlay() {
   } catch (e) { return null; }
 }
 function renderHome() {
-  const last = getLastPlay();
-  const card = el("btn-go-continue");
-  if (last && findBookById(last.bookId)) {
-    card.classList.remove("home-card--hidden");
-    el("continue-label").textContent = last.bookName;
-  } else {
-    card.classList.add("home-card--hidden");
-  }
+  /* Tlačítko "Pokračovat" bylo nahrazeno mini-přehrávačem, který se obnoví automaticky. */
 }
 function showHome() { renderHome(); showScreen("home"); }
+
+/** Po načtení knihovny obnoví naposledy přehrávanou pohádku do mini-přehrávače
+    (nepřehrává automaticky, jen ji připraví — uživatel pokračuje klepnutím na mini-přehrávač). */
+function restoreLastPlay() {
+  if (state.currentBook) return; // už něco hraje v rámci téhle session, nepřepisovat
+  const last = getLastPlay();
+  if (!last) return;
+  const book = findBookById(last.bookId);
+  if (!book || book.audioFiles.length === 0) return;
+
+  state.currentBook = book;
+  state.currentMode = last.mode || "sequential";
+  state.currentChapterIndex = Math.max(0, Math.min(last.chapterIndex || 0, book.audioFiles.length - 1));
+  const file = book.audioFiles[state.currentChapterIndex];
+
+  pendingStartTime = last.currentTime || 0;
+  audio.src = mediaUrl(file.id);
+  el("player-book-title").textContent = bookLabel(book);
+  el("player-chapter-title").textContent = `${state.currentChapterIndex + 1}/${book.audioFiles.length} — ${stripExt(file.name)}`;
+
+  const coverImg = el("player-cover");
+  const fallback = el("player-cover-fallback");
+  if (book.coverId) {
+    coverImg.src = mediaUrl(book.coverId);
+    coverImg.style.display = "block";
+    fallback.style.display = "none";
+  } else {
+    coverImg.removeAttribute("src");
+    coverImg.style.display = "none";
+    fallback.style.display = "block";
+  }
+  renderChaptersList();
+  updateMiniPlayer();
+}
 
 el("btn-go-browse").addEventListener("click", () => {
   state.browseStack = [state.tree];
@@ -349,14 +378,6 @@ function runLottery(callback) {
   }
   tick();
 }
-el("btn-go-continue").addEventListener("click", () => {
-  const last = getLastPlay();
-  if (!last) return;
-  const book = findBookById(last.bookId);
-  if (!book) return;
-  state.returnScreen = "home";
-  openPlayer(book, { chapterIndex: last.chapterIndex || 0, startTime: last.currentTime || 0, mode: last.mode || "sequential" });
-});
 
 /* ---------------------------------------------------------
    10) PROCHÁZENÍ KATALOGU
@@ -402,11 +423,22 @@ function makeFallbackIcon(isBook) {
   return div;
 }
 
+function pluralPohadek(n) {
+  if (n === 1) return `${n} pohádka`;
+  if (n >= 2 && n <= 4) return `${n} pohádky`;
+  return `${n} pohádek`;
+}
+
 function renderBrowseGrid() {
   renderBreadcrumb();
   const node = state.browseStack[state.browseStack.length - 1];
   const grid = el("browse-grid");
   grid.innerHTML = "";
+
+  const allHere = [];
+  collectBooks(node, allHere);
+  el("browse-count").textContent = `${pluralPohadek(allHere.length)} v této složce`;
+
   const items = [];
   if (node.audioFiles.length > 0) items.push({ kind: "book", refNode: node });
   node.children.forEach((child) => items.push({ kind: child.isBook ? "book" : "folder", refNode: child }));

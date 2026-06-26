@@ -12,7 +12,7 @@
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -113,11 +113,6 @@
       <span class="home-card__icon"><svg class="icon"><use href="#icon-dice"/></svg></span>
       <span class="home-card__label">Pohádka na hned</span>
     </button>
-    <button class="home-card home-card--continue home-card--hidden" id="btn-go-continue">
-      <span class="home-card__icon"><svg class="icon"><use href="#icon-play"/></svg></span>
-      <span class="home-card__label">Pokračovat</span>
-      <span class="home-card__sub" id="continue-label"></span>
-    </button>
   </div>
 </div>
 
@@ -128,6 +123,7 @@
     <nav class="breadcrumb" id="breadcrumb"></nav>
     <button class="icon-btn" id="btn-browse-search" aria-label="Hledat"><svg class="icon"><use href="#icon-search"/></svg></button>
   </header>
+  <p class="browse-subbar" id="browse-count"></p>
   <div class="grid" id="browse-grid"></div>
   <p class="empty-msg empty-msg--hidden" id="browse-empty">Tahle složka je prázdná.</p>
 </div>
